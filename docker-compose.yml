@@ -1,5 +1,18 @@
 version: '3'
 services:
+  db:
+    restart: always
+    image: mysql:latest
+    environment:
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - '3307:3306'
+    volumes:
+      - mysql-db:/var/lib/mysql
+    
   kafka:
    restart: always
    image: 'bitnami/kafka:3.5'
@@ -42,6 +55,20 @@ services:
     volumes:
       - ./backend/src:/usr/src/app/src
     command: ["npm", "run", "start:dev"]
+    environment:
+     - DB_HOST=db
+     - DB_PORT=3306
+     - DB_USER=user
+     - DB_PASSWORD=password
+     - DB_SCHEMA=db
+     - MAIN_TOPIC=mail-topic
+     - BATCH_SIZE=1000
+     - KAFKA_HOST=kafka
+     - KAFKA_PORT=9092
 
 volumes:
   kafka-volume:
+  mysql-db:
+   
+networks:
+  batch-emailer:
