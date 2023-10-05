@@ -6,6 +6,7 @@ import {
   Kafka,
 } from 'kafkajs';
 
+// Consumer service that can be used to spin up kafka consumers that listens to topics
 @Injectable()
 export class ConsumerService implements OnModuleDestroy {
   private readonly kafka = new Kafka({

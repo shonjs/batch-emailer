@@ -27,7 +27,7 @@ export class EmailProducerService {
    */
   @Cron(CronExpression.EVERY_5_SECONDS)
   async handleCron() {
-    console.log('-------------running job---------');
+    console.log('app is listening....');
     const pendingEmailJobs: EmailBatchEntity[] =
       await this.getPendingEmailJobs();
     if (!pendingEmailJobs.length) return;
@@ -41,6 +41,7 @@ export class EmailProducerService {
     }
   }
 
+  // Schedule email batches with maximum specified batch size
   async scheduleEmailBatch(
     message: EmailBatchEntity,
     totalScheduled: number,
@@ -69,6 +70,7 @@ export class EmailProducerService {
       .from(EmailBatchEntity, 'EmailBatch')
       .where('EmailBatch.isCompleted = :val', { val: false })
       .andWhere('EmailBatch.scheduled < EmailBatch.total')
+      .orderBy('EmailBatch.createdAt', 'ASC')
       .getMany();
   }
 
@@ -76,6 +78,7 @@ export class EmailProducerService {
     this.emailService.queueEmail(emails, count);
   }
 
+  // Increment the already picked up email counts not to be retried
   private async incrementScheduledCount(
     jobId: number,
     count: number,
@@ -95,6 +98,8 @@ export class EmailProducerService {
     return false;
   }
 
+  // Add in the actual details to be added.
+  // In a real scenario, this might come from a database or some other service
   toMessage(jobId: number, mailId: number) {
     return {
       value: JSON.stringify({
@@ -102,6 +107,8 @@ export class EmailProducerService {
         mailId: mailId,
         to: 'no@email.com',
         from: 'from@email.com',
+        text: 'sample text',
+        html: '<html></html>',
       }),
     };
   }

@@ -1,6 +1,7 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Kafka, Producer, ProducerRecord } from 'kafkajs';
 
+// Producer service that can be used to produce to a kafka topic
 @Injectable()
 export class ProducerService implements OnModuleInit, OnModuleDestroy {
   private readonly kafka = new Kafka({

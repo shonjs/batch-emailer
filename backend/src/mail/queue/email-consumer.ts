@@ -4,33 +4,40 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EmailBatchEntity } from '../entities/email-batch.entity';
 import { Repository, UpdateResult } from 'typeorm';
 import { EmailMessage } from '../types';
+import { MailService } from '../mail.service';
 @Injectable()
 export class EmailConsumerService implements OnModuleInit {
   constructor(
     private readonly consumerService: ConsumerService,
     @InjectRepository(EmailBatchEntity)
     private emailBatch: Repository<EmailBatchEntity>,
+    private readonly mailService: MailService,
   ) {}
 
+  // Load the consumer on module init
   async onModuleInit() {
     await this.consumerService.consume(
       { topic: process.env.MAIN_TOPIC },
       {
         eachMessage: async (data) => {
-          console.log(
-            'received data at maillist ',
-            data.partition,
-            data.message.value.toString(),
-          );
           const isDataPresent = data && data.message && data.message.value;
           if (isDataPresent) {
             const message: EmailMessage = JSON.parse(
               data.message.value.toString(),
             );
 
-            // SEND EMAIL
-            if (this.incrementCompletedCount(message.jobId, 1)) {
+            const isSent: boolean = await this.mailService.sendMail(
+              message.to,
+              message.subject,
+              message.text,
+              message.html,
+            );
+            if (isSent && this.incrementCompletedCount(message.jobId, 1)) {
               this.checkAndSetJobStatus(message.jobId);
+            } else {
+              // Implement retry mechanism here. For example, a retry topic
+              // Currently just logging only
+              console.log(`Failed to send email for job : ${message.jobId}`);
             }
           }
         },
@@ -46,13 +53,26 @@ export class EmailConsumerService implements OnModuleInit {
     count: number,
   ): Promise<boolean> {
     try {
-      const updated: UpdateResult = await this.emailBatch.increment(
-        { id: jobId },
-        'completed',
-        count,
-      );
-      if (updated.affected == 1) {
-        return true;
+      const result = await this.emailBatch.findOne({
+        where: {
+          id: jobId,
+        },
+      });
+      if (result) {
+        let updated: UpdateResult = await this.emailBatch.increment(
+          { id: jobId },
+          'completed',
+          count,
+        );
+        updated = await this.emailBatch.update(
+          {
+            id: jobId,
+          },
+          { modifiedAt: new Date() },
+        );
+        if (updated && updated.affected == 1) {
+          return true;
+        }
       }
     } catch (e) {
       console.log('Error on incrementing completed count', e);
@@ -61,15 +81,18 @@ export class EmailConsumerService implements OnModuleInit {
   }
 
   private async checkAndSetJobStatus(jobId: number) {
-    const res = await this.emailBatch.findOne({
+    const result = await this.emailBatch.findOne({
       where: {
         id: jobId,
       },
     });
-    if (res.total <= res.completed) {
-      const markedRecord: UpdateResult = await this.emailBatch.update(res.id, {
-        isCompleted: true,
-      });
+    if (result && result.total <= result.completed) {
+      const markedRecord: UpdateResult = await this.emailBatch.update(
+        result.id,
+        {
+          isCompleted: true,
+        },
+      );
       if (markedRecord.affected != 1) {
         console.log('Unable to mark job as completed ');
       }

@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, AfterUpdate } from 'typeorm';
 
 @Entity('Email_Batch')
 export class EmailBatchEntity {
@@ -16,4 +16,23 @@ export class EmailBatchEntity {
 
   @Column({ default: false })
   isCompleted: boolean;
+
+  @Column({
+    nullable: false,
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  createdAt: string;
+
+  @Column({
+    nullable: false,
+    type: 'datetime',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  modifiedAt: Date;
+
+  @AfterUpdate()
+  updateModifiedAt() {
+    this.modifiedAt = new Date();
+  }
 }
