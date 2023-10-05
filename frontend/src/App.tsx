@@ -81,10 +81,10 @@ function App() {
 
   return (
     <div className="App">
-      <div>
+      <div className='emailCounts_container'>
         <input id='emailCount' placeholder='Number of email to send' value={emailCount}
-          onChange={handleChange}></input>
-        <input type='button' value="Send" onClick={sendEmail}></input>
+          onChange={handleChange} className='emailCounts_input'></input>
+        <input type='button' value="Send Email" onClick={sendEmail} className='emailCounts_input'></input>
       </div>
       <div>
         <h2>Scheduled Jobs</h2>

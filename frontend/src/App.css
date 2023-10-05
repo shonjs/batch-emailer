@@ -37,6 +37,16 @@
   }
 }
 
+.emailCounts_container{
+    margin-top: 2em;
+    margin-bottom: 2em;
+    line-height: 4em;
+}
+
+.emailCounts_input{
+    padding:1em;
+}
+
 .scheduledJobs_container {
   display: flex; 
   justify-content: space-between; 
@@ -65,5 +75,5 @@
   border-radius: 5px;
   text-align: center;
   color: white;
-  transition: width 2s ease-in-out;
+  transition: width 3s ease-in-out;
 }
