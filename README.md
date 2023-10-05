@@ -5,7 +5,7 @@ This is an application to run a send a bulk email set. The frontend has an input
 ---
 Please clone the application and go to the root folder
 ```
-git clone <git repo> && cd batch-emailer
+git clone git@github.com:shonjs/batch-emailer.git && cd batch-emailer
 ```
 
 The application with its env values are available in the docker-compose.yml file at the root folder. You can setup the application by running :
@@ -26,4 +26,4 @@ To turn down the application you can run
 
 ### Use the application
 ---
-Once everything is setup. You can go the localhost:3000 where you can access the frontend page to send emails.
+Once everything is setup. You can go to ```localhost:3000``` on your browser, where you can access the page to send emails.
