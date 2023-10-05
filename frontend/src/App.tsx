@@ -84,7 +84,7 @@ function App() {
       <div className='emailCounts_container'>
         <input id='emailCount' placeholder='Number of email to send' value={emailCount}
           onChange={handleChange} className='emailCounts_input'></input>
-        <input type='button' value="Send Email" onClick={sendEmail} className='emailCounts_input'></input>
+        <input type='button' style={{ cursor:"pointer" }} value="Send Email" onClick={sendEmail} className='emailCounts_input'></input>
       </div>
       <div>
         <h2>Scheduled Jobs</h2>
